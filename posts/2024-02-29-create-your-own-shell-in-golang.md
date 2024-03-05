@@ -1,13 +1,14 @@
 ---
 title: "我用 Go 开发了一个简易版 shell"
 date: 2024-02-25T17:51:45+08:00
-draft: true
+draft: false
 comment: true
 description: "之前看到 Github 有个 build-your-own-x 的仓库，觉得挺有意思的，有不少有趣的实现。我就想着多尝试实现些这样的小项目，看看不同的领域。一方面提升我的编程能力，另外，也希望能发现一些不错的项目。"
 ---
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-02/2024-02-29-create-your-own-shell-in-golang-01.png)
 
+测试是否自动触发更新。
 之前看到 Github 有个非常受欢迎的 build-your-own-x 仓库，觉得挺有意思的，有不少有趣的实现。我就想着多尝试实现些这样的小项目，看看不同的领域。一方面提升我的编程能力，另外，也希望能发现一些不错的项目。
 
 今天的项目在 build-your-own-x 中也能找到，即 build your own shell。这个项目能帮助学习 Go 如何进行如 IO 输入输出、如何发起进程调用等操作。

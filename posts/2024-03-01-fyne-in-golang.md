@@ -1,18 +1,22 @@
 ---
-title: "2024 03 01 Fyne in Golang"
-date: 2024-03-02T18:42:00+08:00
-draft: true
+title: "一个 Go 实现的跨平台 GUI 框架 Fyne"
+date: 2024-03-07T08:00:00+08:00
+draft: false
 comment: true
-description: ""
+description: "Go 一直以来都没有一个标准 GUI 库，Go 官方也没有提供。在 Go 实现的几个 GUI 库中，Fyne 算是最出色的，它有着简洁的API、支持跨平台能力，且高度可扩展。这也就是说，Fyne 是用来开发 App。"
 ---
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-01.png)
 
 今天，推荐一个 Go 实现的 GUI 库 - fyne。
 
-Go 一直以来都没有一个标准 GUI 库，Go 官方也没有提供。在 Go 实现的几个 GUI 库中，Fyne 算是最出色的，它有着简洁的API、支持跨平台能力，且高度可扩展。这也就是说，Fyne 是用来开发 App。
+Go 官方也没有提供标准的 GUI 框架，在 Go 实现的几个 GUI 库中，Fyne 算是最出色的，它有着简洁的API、支持跨平台能力，且高度可扩展。这也就是说，Fyne 是用来开发 App。
 
 本文将尝试介绍下 Fyne，希望对大家快速上手这个 GUI 框架有所帮助。我最近产生了不少想法，其中有些是对 GUI 有要求的，就想着折腾用 Go 实现，而不是用那些已经很流行和成熟的 GUI 框架。
 
-在写这篇文章时，顺手搞了下它的中文版文档，文档查看 [www.poloxue.com/gofyne](https://www.poloxue.com.com)，希望能帮助那些想继续深入这个框架的朋友。
+在写这篇文章时，顺手搞了下它的中文版文档，文档查看 [www.poloxue.com/gofyne](https://www.poloxue.com/gofyne)，希望能帮助那些想继续深入这个框架的朋友。
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-15.png)
 
 ## 安装 fyne
 
@@ -38,9 +42,7 @@ $ go run fyne.io/fyne/v2/cmd/fyne_demo@latest
 
 看起来，这里面的案例还是不够丰富的。
 
-安装工作到此就完成了。
-
-Fyne 对不同系统有不同依赖，如果安装过程中遇到问题，细节可查看官方提供的[安装文档](https://www.poloxue.com/gofyne/docs/01-started/01-index/)。
+安装工作到此就完成了。Fyne 对不同系统有不同依赖，如果安装过程中遇到问题，细节可查看官方提供的[安装文档](https://www.poloxue.com/gofyne/docs/01-started/01-index/)。
 
 ## 创建第一个应用
 
@@ -189,13 +191,13 @@ w.SetContent(content)
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-12.gif)
 
-## 自定义组件
+## Fyne 中的自定义
 
-在实际项目中使用 Fyne，基本上是要自定义控件、布局或者使用数据绑定功能的。自定义控件用于创建符合需求的控件。Fyne 提供了自定义控件、布局和主题等。
+如果在实际项目中使用 Fyne，基本上是要使用 Fyne 的自定义能力。Fyne 提供了自定义控件、布局和主题等。
 
 ### 自定义控件
 
-fyne 是支持实现自定义控件的，这涉及定义控件的绘制方法和布局逻辑，我们主要是实现两个接口：`fyne.Widget` 和 `fyne.WidgetRenderer`。
+fyne 是支持实现自定义控件的，这涉及定义控件的绘制方法和布局逻辑。我们主要是实现两个接口：`fyne.Widget` 和 `fyne.WidgetRenderer`。
 
 `fyne.Widget` 的定义如下所示：
 
@@ -206,7 +208,7 @@ type Widget interface {
 }
 ```
 
-而其中返回的就是 `WiddgetRenderer`，用于定义控件布局渲染的逻辑。
+`CreateRenderer` 方法返回的就是 `WiddgetRenderer`，用于定义控件渲染和布局的逻辑。
 
 ```go
 type WidgetRenderer interface {
@@ -218,31 +220,155 @@ type WidgetRenderer interface {
 }
 ```
 
-现在我要实现一个类似 Label 的控件，如下是控件定义：
+这样拆分的目标是为将了控件的逻辑和 UI 绘制分离开来，在 `Widget` 中专注于逻辑，而 `WidgetRenderer` 中专注于渲染布局。
+
+假设实现一个类似 Label 的控件，类型定义：
 
 ```go
 type CustomLabel struct {
     widget.BaseWidget
-    Text              string
+    Text string
 }
 ```
 
-它继承了 `wiget.BaseWidget` 的基本控件实现，我们只要实现 `CreateRenderer` 方法即可。
+它继承了 `wiget.BaseWidget` 基本控件实现，`Text` 就是要 `Label` 显示的文本。还要给给 `CustomLabel` 实现 `CreateRenderer` 方法。
 
-定义 `customWidgetRenderer` 类型：
+定义 `CustomLabel` 创建函数：
+
+```go
+func NewCustomLabel(text string) *CustomLabel {
+	label := &CustomLabel{Text: text}
+	label.ExtendBaseWidget(label)
+	return label
+}
+```
+
+`customWidgetRenderer` 类型定义如下：
 
 ```go
 type customWidgetRenderer struct {
     text  *canvas.Text // 使用canvas.Text来绘制文本
-    owner *CustomWidget
+    label *CustomLabel
 }
 ```
 
+实现 `CustomLabel` 的 `CreateRenderer` 方法。
+
+```go
+func (label *CustomLabel) CreateRenderer() fyne.WidgetRenderer {
+	text := canvas.NewText(label.Text, theme.ForegroundColor())
+	text.Alignment = fyne.TextAlignCenter
+
+	return &customLabelRenderer{
+		text:  text,
+		label: label,
+	}
+}
+```
+
+构建 `Renderer` 变量，使用 `canvas` 创建 `Text` 文本框，为适配主题使用主题配置前景色。还有，设置文本居中显示。
+
+而 `customLabelRenderer` 要实现 `WidgetRender` 接口定义的所有方法。
+
+```go
+func (r *customLabelRenderer) MinSize() fyne.Size {
+	return r.text.MinSize()
+}
+
+func (r *customLabelRenderer) Layout(size fyne.Size) {
+	r.text.Resize(size)
+}
+
+func (r *customLabelRenderer) Refresh() {
+	r.text.Text = r.label.Text
+	r.text.Color = theme.ForegroundColor() // 确保文本颜色更新
+	r.text.Refresh()
+}
+
+func (r *customLabelRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
+func (r *customLabelRenderer) Objects() []fyne.CanvasObject {
+	return []fyne.CanvasObject{r.text}
+}
+
+func (r *customLabelRenderer) Destroy() {}
+```
+
+在 main 函数中，尝试使用这个控件。
+
+```go
+a := app.New()
+w := a.NewWindow("Custom Label")
+
+w.SetContent(NewCustomLabel("Hello"))
+w.ShowAndRun()
+```
+
+显示的效果和 Label 控件是类似的。
+
+### 其他自定义
+
+其他自定义能力，如 Layout、Theme，我就不展开介绍。如果有机会，写点实际应用案例。如果基于案例介绍，会更有体悟吧。
+
+还有，Fyne 的官方文档写的挺易读的，可直接看它的文档。
+
 ## 数据绑定
 
-Fyne 的数据绑定功能允许控件直接与数据源连接，数据的任何更改都会自动反映在UI上，反之亦然。
+Fyne 从 v2.0.0 开始支持数据绑定。它让控件和与数据实时连接，数据更改会自动反映在UI上，反之亦然。
+
+控件为了支持数据绑定能力，一般会提供如 `NewXXXWithData` 的接口。直接通过场景说明，场景：编辑输入框的内容，可直接实现到 Label 上。
+
+核心代码如下所示：
+
+```go
+// 创建一个字符串绑定
+textBind := binding.NewString()
+
+// 创建一个 Entry，将其内容绑定到 textBind
+entry := widget.NewEntryWithData(textBind)
+
+// 创建一个 Label，也将其内容绑定到同一个 textBind
+label := widget.NewLabelWithData(textBind)
+
+// 使用容器放置 Entry 和 Label，以便它们都显示在窗口中
+content := container.NewVBox(entry, label)
+```
+
+显示效果，如下所示：
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-13.gif)
+
+尝试让前面自定义的 `CustomLabel` 支持数据绑定能力。只要创建一个 `NewCustomLabelWithData` 构造函数。
+
+如下所示：
+
+```go
+func NewCustomLabelWithData(data binding.String) *CustomLabel {
+	label := &CustomLabel{}
+	label.ExtendBaseWidget(label)
+	data.AddListener(binding.NewDataListener(func() {
+		text, _ := data.Get()
+		label.Text = text
+		label.Refresh()
+	}))
+	return label
+}
+```
+
+通过 `data` 监听数据变化后，立刻刷新组件。
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-14.gif)
+
+如上所示，我们这个自定义 Label 中的文本是居中显示的。
+
+数据绑定的核心是监听器模式（Observer pattern）。每个绑定对象内部维护了一个监听器列表，当数据变化时，这些监听器会被通知更新。
+
+在 Fyne 中，通过 `data.AddListner()` 将 UI 组件与数据绑定对象绑定时，实际上是在数据对象上注册了一个监听器，这个监听器会在数据变化时更新 UI 组件的状态。
 
 ## 结语
 
-Fyne 以其简单、强大和跨平台的特性，为我们使用 GO 开发现代 GUI 应用提供了一个优秀的选择。无论你是初学者还是有经验的开发者，Fyne都值得一试。随着对 Fyne 的深入，你将能够更加灵活地构建出符合需求的应用，享受Go语言开发GUI带来的乐趣。
+Fyne 是简单、强大和跨平台的 GUI 工具，使得用 GO 开发现代 GUI 应用多了一个优秀选择。随着对 Fyne 的深入，它能够更加灵活地构建出符合需求的应用。
 
+我喜欢用 Go 的原因，很重要的原因就是它的简洁性，很容易看到本质的东西，但又无需理解太复杂的编程概念。

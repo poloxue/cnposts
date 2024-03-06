@@ -1,6 +1,6 @@
 ---
 title: "2024 03 01 Fyne in Golang"
-date: 2024-02-29T18:42:00+08:00
+date: 2024-03-02T18:42:00+08:00
 draft: true
 comment: true
 description: ""
@@ -8,13 +8,17 @@ description: ""
 
 今天，推荐一个 Go 实现的 GUI 库 - fyne。
 
-Go 一直以来都没有一个标准 GUI 库，Go 官方也没有提供。在 Go 语言的几个 GUI 库中，Fyne 算是最出色的，它有着简洁的API、支持跨平台能力，且高度可扩展。
+Go 一直以来都没有一个标准 GUI 库，Go 官方也没有提供。在 Go 实现的几个 GUI 库中，Fyne 算是最出色的，它有着简洁的API、支持跨平台能力，且高度可扩展。这也就是说，Fyne 是用来开发 App。
 
-本文将从浅到深逐步对 Fyne 展开介绍，希望对大家快速上手这个 GUI 框架有所帮助。
+本文将尝试介绍下 Fyne，希望对大家快速上手这个 GUI 框架有所帮助。我最近产生了不少想法，其中有些是对 GUI 有要求的，就想着折腾用 Go 实现，而不是用那些已经很流行和成熟的 GUI 框架。
+
+在写这篇文章时，顺手搞了下它的中文版文档，文档查看 [www.poloxue.com/gofyne](https://www.poloxue.com.com)，希望能帮助那些想继续深入这个框架的朋友。
 
 ## 安装 fyne
 
-开始前，确保你已安装Go。如果是 MacOS X 系统，请确认安装了 xcode。使用 `go get` 命令安装 Fyne。
+开始前，确保已成功安装 Go，如果是 MacOS X 系统，要确认安装了 xcode。
+
+如下使用 `go get` 命令安装 Fyne。
 
 ```bash
 $ mkdir hellofyne
@@ -23,12 +27,6 @@ $ go mod init hellofyne
 $ go get fyne.io/fyne/v2@latest
 $ go install fyne.io/fyne/v2/cmd/fyne@latest
 ```
-
-安装完成后，可从 [setup](https://geoffrey-artefacts.fynelabs.com/github/andydotxyz/fyne-io/setup/latest/) 下载 fyne 的安装检测程序检查下。
-
-检测结果：
-
-![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-02-v1.png)
 
 如果想立刻查看 fyne 提供的演示案例，通过命令检查：
 
@@ -40,7 +38,9 @@ $ go run fyne.io/fyne/v2/cmd/fyne_demo@latest
 
 看起来，这里面的案例还是不够丰富的。
 
-到此，准备工作结束！
+安装工作到此就完成了。
+
+Fyne 对不同系统有不同依赖，如果安装过程中遇到问题，细节可查看官方提供的[安装文档](https://www.poloxue.com/gofyne/docs/01-started/01-index/)。
 
 ## 创建第一个应用
 
@@ -95,15 +95,13 @@ w.SetContent(btn)
 
 ## 布局和控件
 
-布局和控件是 GUI 框架中必不可少的组件。Fyne 提供了多种布局管理器和标准的 UI 控件，支持创建更复杂的界面。
+布局和控件是 GUI 应用程序设计中必不可少的两类组件。Fyne 提供了多种布局管理器和标准的 UI 控件，支持创建更复杂的界面。
 
 ### 布局管理
 
-Fyne 中的布局的实现位于 `container` 包中。
+Fyne 中的布局的实现位于 `container` 包中。它提供了多种不同布局方式安排窗口中的元素。最基本的布局方式有 `HBox` 水平布局和 `VBox` 垂直布局。
 
-它提供了多种不同布局方式安排窗口中的元素。例如，例如最基本的 `HBox` 水平布局和 `VBox` 垂直布局。
-
-通过 `HBox` 创建水平布局：
+通过 `HBox` 创建水平布局的代码如下：
 
 ```go
 w.SetContent(container.NewHBox(widget.NewButton("Left", func() {
@@ -117,7 +115,7 @@ w.SetContent(container.NewHBox(widget.NewButton("Left", func() {
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-09.png)
 
-同理，`VBox` 创建垂直布局：
+通过 `VBox` 创建垂直布局的例子。
 
 ```go
 w.SetContent(container.NewVBox(widget.NewButton("Top", func() {
@@ -131,35 +129,44 @@ w.SetContent(container.NewVBox(widget.NewButton("Top", func() {
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-10.png)
 
+Fyne 除了基础的水平（`HBoxLayout`）和垂直（`VBoxLayout`）布局，还提供了`GridLayout`、`FormLayout` 甚至是混合布局 C`ombinedLayout` 等高级布局方式。
 
-Fyne 除了基础的水平（`HBoxLayout`）和垂直（`VBoxLayout`）布局，还提供了`GridLayout`、`FormLayout`等高级布局方式。`GridLayout`可以将元素均匀地分布在网格中，而`FormLayout`适用于创建表单，自动排列标签和字段。这些灵活的布局选项支持创建更复杂和功能丰富的GUI界面。
+如 `GridLayout`可以将元素均匀地分布在网格中，而`FormLayout`适用于创建表单，自动排列标签和字段。这些灵活的布局选项支持创建更复杂和功能丰富的GUI界面。
 
-在 Fyne 示例中可以找到更多布局的内容：
-
-![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-11.png)
-
-或者查看官方文档：[Layout List](https://docs.fyne.io/explore/layouts)。
+官方文档中的布局列表查看：[Layout List](https://www.poloxue.com/gofyne)。
 
 ### 更多控件
 
 前面的演示案例中，用到了两个控件：Label 和 Button，Fyne 还支持其他多种控件，它们都为于 `widget` 包中。
 
-常见控件一览：
+我尝试在一份代码中展示出来，如下是常见控件一览：
 
 ```go
+// 标签 Label
 label := widget.NewLabel("Label")
+// 按钮 Button
 button := widget.NewButton("Button", func() {})
+// 输入框 Entry
 entry := widget.NewEntry()
 entry.SetPlaceHolder("Entry")
+// 复选框 Check
 check := widget.NewCheck("Check", func(bool) {})
+// 单选框 Check
 radio := widget.NewRadioGroup([]string{"Option 1", "Option 2"}, func(string) {})
-selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B"})
+// 选择框
+selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B"}
+// 进度条
 progressBar := widget.NewProgressBar()
+// 滑块
 slider := widget.NewSlider(0, 100)
+// 组合框
 combo := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, func(string) {})
+// 表单项
 formItem := widget.NewFormItem("FormItem", widget.NewEntry())
 form := widget.NewForm(formItem)
+// 手风琴
 accordion := widget.NewAccordion(widget.NewAccordionItem("Accordion", widget.NewLabel("Content")))
+// Tab 选择
 tabs := container.NewAppTabs(
 	container.NewTabItem("Tab 1", widget.NewLabel("Content 1")),
 	container.NewTabItem("Tab 2", widget.NewLabel("Content 2")),
@@ -170,6 +177,7 @@ dialogButton := widget.NewButton("Show Dialog", func() {
 	dialog.ShowInformation("Dialog", "Dialog Content", w)
 })
 
+// 滚动布局
 content := container.NewVScroll(container.NewVBox(
 	label, button, entry, check, radio, selectEntry, progressBar, slider,
 	combo, form, accordion, tabs, dialogButton,
@@ -181,17 +189,15 @@ w.SetContent(content)
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-01-fyne-in-golang-12.gif)
 
-## 自定义控件和数据绑定
+## 自定义组件
 
-要在实际项目中使用 Fyne，基本上是要自定义控件或者使用数据绑定功能的。自定义控件用于创建符合需求的控件，而数据绑定用于帮助我们轻松地创建动态 UI。
+在实际项目中使用 Fyne，基本上是要自定义控件、布局或者使用数据绑定功能的。自定义控件用于创建符合需求的控件。Fyne 提供了自定义控件、布局和主题等。
 
 ### 自定义控件
 
-如果要在 fyne 上实现自定义控件，涉及定义控件的绘制方法和布局逻辑。
+fyne 是支持实现自定义控件的，这涉及定义控件的绘制方法和布局逻辑，我们主要是实现两个接口：`fyne.Widget` 和 `fyne.WidgetRenderer`。
 
-首先，自定义控件要实现两个接口：`fyne.Widget` 和 `fyne.WidgetRenderer`。
-
-首先，`fyne.Widget` 的定义如下所示：
+`fyne.Widget` 的定义如下所示：
 
 ```go
 type Widget interface {
@@ -212,9 +218,7 @@ type WidgetRenderer interface {
 }
 ```
 
-假设，现在我要实现一个简单的控件，一个类似 Label 的控件。
-
-如下是这个控件类型的定义：
+现在我要实现一个类似 Label 的控件，如下是控件定义：
 
 ```go
 type CustomLabel struct {
@@ -234,11 +238,11 @@ type customWidgetRenderer struct {
 }
 ```
 
-### 数据绑定
+## 数据绑定
 
 Fyne 的数据绑定功能允许控件直接与数据源连接，数据的任何更改都会自动反映在UI上，反之亦然。
 
 ## 结语
 
-Fyne 以其简单、强大和跨平台的特性，为Go语言开发现代GUI应用提供了一个优秀的选择。无论你是初学者还是有经验的开发者，Fyne都值得一试。随着对 Fyne 的深入，你将能够更加灵活地构建出符合需求的应用，享受Go语言开发GUI带来的乐趣。
+Fyne 以其简单、强大和跨平台的特性，为我们使用 GO 开发现代 GUI 应用提供了一个优秀的选择。无论你是初学者还是有经验的开发者，Fyne都值得一试。随着对 Fyne 的深入，你将能够更加灵活地构建出符合需求的应用，享受Go语言开发GUI带来的乐趣。
 

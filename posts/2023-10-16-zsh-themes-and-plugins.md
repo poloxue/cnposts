@@ -342,7 +342,7 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting ${ZSH_CUSTOM:-~/.
 打开 `.zshrc` 完成配置：
     
 ```zsh
-plugins=(git web-search jsontools z vi-mode zsh-syntax-highlighting zsh-autosuggestion)
+plugins=(git web-search jsontools z vi-mode zsh-syntax-highlighting zsh-autosuggestions)
 ```
 
 记得执行 `source ~/.zshrc` 生效配置。

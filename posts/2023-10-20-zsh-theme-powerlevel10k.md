@@ -72,6 +72,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 首先，为了确认 NerdFont 字体安装成功，正式开始配置前，要先提出几个问题，识别图片是否如描述说的那样。我们回答后才能进入到主题的自定义。
 
+
 这些问题有诸如：
 
 - Does this look like a diamond (rotated square)? 这是看起来钻石吗？
@@ -80,7 +81,11 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 等等。
 
-如果字体已经配置成功，这些问题看起来就像逗傻子一样，按实际情况回答问题即可。如果字体安装成功，都是选择 "Yes" 即可。
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2023-10/2023-10-20-zsh-theme-powerlevel10k-17.png)
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2023-10/2023-10-20-zsh-theme-powerlevel10k-18.png)
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2023-10/2023-10-20-zsh-theme-powerlevel10k-19.png)
+
+如果已经成功安装配置了字体，这些问题看起来就像逗傻子一样，按实际情况回答问题即可。如果字体安装成功，都是选择 "Yes" 即可。
 
 ### 开始配置
 
@@ -240,7 +245,7 @@ typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
   midnight_commander
   nix_shell         
   chezmoi_shell      
-  # vpn_ip            
+  vpn_ip            
   load                 
   disk_usage           
   ram                  
@@ -249,8 +254,8 @@ typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
   timewarrior             
   taskwarrior             
   per_directory_history   
-  # cpu_arch              
-  # time                  
+  cpu_arch              
+  time                  
   newline
   ip                    
   public_ip            

@@ -188,59 +188,124 @@ func (r *Registry) Close() {
 
 假设我们有一个应用，需要根据配置来动态调整行为。这些配置存储在 ETCD 中，我们想要实时监听这些配置项的变化。借助于监听器模式，我们可以轻松实现这一需求。
 
-首先，我们需要一个能够监听 ETCD 变化的注册中心：
+基于监听器模式实现 ETCD 热更新的要求，我们将设计一个系统，其中：
+
+- 每个监听器可以订阅特定的 key 或 key 前缀。
+- 使用 `channel` 来处理 ETCD 的变更事件，并触发对应的监听回调。
+
+这个设计涉及到以下几个组件：
+
+1. **`Watcher`**：负责监听 ETCD 中的 key 变更事件。
+2. **`Listener`**：定义了当特定 key 发生变化时需要执行的回调逻辑。
+3. **`Registry`**：管理所有的 `Listener`，并将 ETCD 变更事件分发给对应的 `Listener`。
+
+### 定义 Listener 接口
+
+每个 `Listener` 都应该实现以下接口，以便能够处理特定的 key 变更事件：
 
 ```go
-type EtcdRegistry struct {
-    Registry
-    cli *clientv3.Client
+type Listener interface {
+    OnTrigger(key string, value string)
+}
+```
+
+### 实现 Registry
+
+`Registry` 负责维护 `Listener` 的注册，并在接收到 key 变更事件时通知相关的 `Listener`：
+
+```go
+type Registry struct {
+    listeners map[string][]Listener
+    eventChannel chan *Event
 }
 
-func NewEtcdRegistry(endpoints []string) *EtcdRegistry {
-    cli, err := clientv3.New(clientv3.Config{
-        Endpoints: endpoints,
+func NewRegistry() *Registry {
+    return &Registry{
+        listeners: make(map[string][]Listener),
+        eventChannel: make(chan *Event),
+    }
+}
+
+func (r *Registry) Register(key string, listener Listener) {
+    r.listeners[key] = append(r.listeners[key], listener)
+}
+
+func (r *Registry) Start() {
+    go func() {
+        for event := range r.eventChannel {
+            if listeners, ok := r.listeners[event.Key]; ok {
+                for _, listener := range listeners {
+                    listener.OnTrigger(event.Key, event.Value)
+                }
+            }
+        }
+    }()
+}
+
+func (r *Registry) Notify(event *Event) {
+    r.eventChannel <- event
+}
+```
+
+这里，`Event` 是一个简单的结构体，表示 ETCD 中 key 的变更事件：
+
+```go
+type Event struct {
+    Key   string
+    Value string
+}
+```
+
+### 实现 Watcher
+
+`Watcher` 负责从 ETCD 订阅 key 的变更事件，并将这些事件发送到 `Registry` 的 `eventChannel` 上：
+
+```go
+func WatchEtcdKeys(client *clientv3.Client, registry *Registry, watchKeys ...string) {
+    for _, key := range watchKeys {
+        go func(key string) {
+            watchChan := client.Watch(context.Background(), key, clientv3.WithPrefix())
+            for wresp := range watchChan {
+                for _, ev := range wresp.Events {
+                    event := &Event{
+                        Key:   string(ev.Kv.Key),
+                        Value: string(ev.Kv.Value),
+                    }
+                    registry.Notify(event)
+                }
+            }
+        }(key)
+    }
+}
+```
+
+### 使用示例
+
+让我们实际在 main 函数上使用一下，观察行为是否正常。
+
+```go
+func main() {
+    client, err := clientv3.New(clientv3.Config{
+        Endpoints:   []string{"localhost:2379"},
     })
     if err != nil {
         log.Fatal(err)
     }
+    defer client.Close()
 
-    return &EtcdRegistry{cli: cli}
-}
+    registry := NewRegistry()
+    registry.Start()
 
-func (er *EtcdRegistry) Watch(key string) {
-    rch := er.cli.Watch(context.Background(), key, clientv3.WithPrefix())
-    for wresp := range rch {
-        for _, ev := range wresp.Events {
-            er.NotifyAll(string(ev.Kv.Key), string(ev.Kv.Value))
-        }
-    }
-}
-```
+    // 注册监听器
+    registry.Register("/config/database", NewDatabaseConfigListener())
 
-我们定义一个监听器来处理配置更新：
-
-```go
-type ConfigUpdater struct{}
-
-func (cu *ConfigUpdater) Update(key, value string) {
-    fmt.Printf("配置更新 - Key: %s, New Value: %s\n", key, value)
-    // 这里可以添加你的配置更新逻辑
+    // 开始监听 ETCD key 变更
+    WatchEtcdKeys(client, registry, "/config/")
 }
 ```
 
-最后，将一切串联起来：
+在这个示例中，我们创建了一个 ETCD 客户端，初始化了一个 `Registry`，并为特定的 key 注册了一个 `Listener`。然后，通过 `WatchEtcdKeys` 函数开始监听 `/config/` 前缀下的所有 key 的变更。
 
-```go
-func main() {
-    registry := NewEtcdRegistry([]string{"localhost:2379"})
-    updater := &ConfigUpdater{}
+这种设计支持对特定 key 或 key 前缀的监听，当相关的 key 发生变更时，能够通过 `channel` 触发注册的 `Listener` 的回调逻辑，从而实现配置的热更新。
 
-    registry.Register(updater)
-    registry.Watch("/config")
-}
-```
-
-这个案例演示了如何使用监听器模式监听 ETCD 中的 key 和子 key 的变化，并处理配置更新逻辑。通过使用 Go 的特性，我们不仅能够实现这一功能，还能
-
-保证其高效并发执行。
-
+特别说明，示例仅作为概念验证，实际应用中需要更多的错误处理和优化。

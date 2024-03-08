@@ -338,8 +338,6 @@ func main() {
   defer client.Close()
 
   registry := NewRegistry()
-  registry.Start()
-
     // 注册监听器
   registry.Register("/config/mysql", NewListener(func(event * Event) {
     fmt.Println(event)

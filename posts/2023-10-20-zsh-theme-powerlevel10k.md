@@ -9,7 +9,9 @@ tags: ["zsh"]
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2023-10/2023-10-20-zsh-theme-powerlevel10k-15.png)
 
-本文介绍 zsh 主题 powerlevel10k 的安装与配置。
+不知道你是否想过自定义 Shell 提示符主题能带来的不仅是终端美观度的提升，还能通过视觉优化增强了工作效率呢？
+
+在众多 shell 提示符主题中，Powerlevel10k 因为支持高度可定制和丰富的功能选，非常值得推荐。本文基于这个主题介绍 zsh 主题插件 powerlevel10k，包括它的安装和配置自定义。
 
 {{< video bb_id=620048257 yt_id=3FmaWzqtWZ0 >}}
 

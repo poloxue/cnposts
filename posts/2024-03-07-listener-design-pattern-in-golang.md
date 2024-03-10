@@ -300,6 +300,8 @@ func (r *Registry) Notify(event *Event) {
 }
 ```
 
+注册 `Listener` 到 `Registry` 中，通过 `map` 将 `key` 与 `Listener` 关联起来。
+
 ### 实现 Watcher
 
 `Watcher` 负责从 ETCD 订阅 key 的变更事件，并将这些事件发送到 `Registry` 的 `eventChannel` 上：

@@ -1,5 +1,5 @@
 ---
-title: "我用 GitHub 作为存储开发了一个随机图片 API"
+title: "我用 GitHub 实现随机图片"
 date: 2023-11-17T15:35:36+08:00
 draft: false
 comment: true
@@ -8,42 +8,35 @@ description: "本文介绍如何基于 GitHub 为图片存储，通过 API 随�
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2023-11/2023-11-17-build-a-random-image-api-using-github-01.png)
 
-本文介绍如何基于 GitHub 为图片存储，通过 API 随机返回可用的图片地址。
-
-之所以研究它，主要是为了省钱，毕竟用啥 S3、七牛云、阿里云都是要花钱的。这套思路，gitee 应该也可以的，不过我看网上说，gitee 禁止图床开源啥的。而开发随机图片 API 只是为了验证是否能通过 GitHub 的 API 获取仓库中的文件，支持进一步开发其他管理工具。
+本文将介绍如何用 GitHub 作为图片存储，实现随机更换我的终端和桌面的背景。为了完成目标，我会推荐一个快速访问 GitHub API 的 Go 三库 [go-github](https://github.com/google/go-github)，简要介绍它的使用。
 
 ## 前言
 
-平时常用的桌面壁纸、终端背景图片，亦或是博客背景或文章封面，这些都离不开图片。于是，如何就想如何免费管理这些图片。
+我研究这个方案主要是为了省钱，毕竟 S3、七牛云、阿里云都不是免费的。作为一名10年+的老程序员而言，就想着自己动手，肯定是最好的。
 
-在网上找了一些免费的随机图片 API，大部分处于不可用的状态，或者是需要注册登录，创建 API Token。
+想法不错，如何实现呢？
 
-作为一名老年程序员，自然就想能通过编程实现，实现图片自由。虽然也可以通过类似爬虫的思路实现，但还是希望都在自己的控制中，万一出现不好的图片就不好了。
+首先，要搞明白的是，这些存储服务的价值除了能存储内容，主要还是它们提供了访问加速，图床。
 
-## 免费 CDN 加速
+## 加速访问
 
-我的博客图片一直在用 GitHub 存储，通过 jsdelivr CDN 加速。于是就思考，如果能获取到 GitHub 存储的文件列表，就可以实现一个图片服务。
+我的博客图片一直是存储 GitHub 上，通过 [jsdelivr CDN](https://jsdelivr.net/) 加速访问。于是想到，我只要编程上传 GitHub 图片和访问仓库中的文件列表，就可以实现目标。
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2023-11/2023-11-17-build-a-random-image-api-using-github-02.png)
 
-简单说下 jsdelivr CDN，它支持对 GitHub 中文件的加速访问。如位于我的仓库下的图片，通过对地址转为为 jsdelivr CDN 地址。
+稍微展开说下 jsdelivr CDN，它是一款为开源项目而生的免费 CDN，支持对如 npm、GitHub、ESM、wordpress 下文件加速访问。
 
-如下的地址：
-
-```bash
-https://github.com/poloxue/public_images/default/0001.webp 
-```
-
-通过如下地址访问：
+举例说明，我有一个图片保存在 poloxue/public_images 仓库，路径为 default/0001.webp。它的加速访问路径如下：
 
 ```bash
 https://cdn.jsdelivr.net/gh/poloxue/public_images@latest/default/0001.webp
 ```
 
-现在如果能顺利获取到仓库的图片文件列表，即可将 github 作为我们的图片图片存储，而无需花钱购买云存储实现。
+我只要能顺利拿到图片地址，将其在 github 中的存储路径转化为 jsdelivr CDN 加速的路径，就实现免费存储与加速访问。
 
+## GitHub RestAPI
 
-## 查询 GitHub 图片列表
+查询 GitHub 图片列表
 
 如何获得 GitHub 文件列表呢？这篇文章是讲如何将 GitHub 作为存储使用的，肯定要支持查询的，否则就没法玩了。
 

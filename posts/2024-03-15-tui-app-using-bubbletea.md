@@ -11,11 +11,13 @@ comment: true
 
 一个月前，我写了一篇基于 Bubbletea 开发 TUI 命令的文章。当时的我对这个框架的认识并不深入，仅限于开发一些简单小程序，如果想开发一个如 LazyGit 般复杂的程序时，就没有那么容易了。
 
-今天这篇文章重点介绍 bubbletea 衍生出来的一系列扩展，让我们无论是开发简单的行内工具，还是复杂全屏应用，都更得心应手。
+今天的文章重点介绍 bubbletea 衍生的一系列扩展库，它们都位于 github.com/charmbracelet。
 
-### Bubble Tea 核心框架
+特别的是，这些扩展库 star 数基本都在千以上。说实在的，很少遇到核心框架之外，扩展库的 star 也基本在千以上的。我觉得主要因为这些库的普适性，可独立于 bubbletea 之外使用。
 
-Bubbletea 是这个生态的核心，它是我们开发 TUI 应用的起点，基于模型-视图-更新（MVU）架构（The Elm Architecture）。具体细节可查看前文的介绍。
+## Bubble Tea 核心框架
+
+Bubbletea 是这个生态的核心框架，它是我们开发 TUI 应用的起点，基于模型-视图-更新（MVU）架构（The Elm Architecture）。具体细节可查看前文的介绍。
 
 如下是源于官方指南中的 HelloWorld 案例，基于 bubbletea 创建一个简单的计数器。
 
@@ -64,43 +66,225 @@ func main() {
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-02/2024-02-19-tui-library-bubble-tea-in-golang-03.gif)
 
-### 一些基础扩展
+## 一些基础扩展
 
-随着我对 Bubble Tea 框架的深入，需求也在变多，我开始了解其它 bubbletea 衍生而来的扩展库。我觉得首先是 4 个极可能受到大家关心的扩展库，分别是布局与样式 - Lipgloss，组件库 - bubbles，交互式 form 表单 - huh，markdown 渲染器 - glamour，还有动画制作 - Harmonica。
+随着我对 Bubble Tea 框架的深入，需求也在变多，我开始了解其它 bubbletea 衍生而来的扩展库。我觉得首先是 3 个极可能受到大家关心的库，分别是布局与样式 - Lipgloss，组件库 - bubbles，交互式 form 表单 - huh
 
-Lipgloss，它提供了布局和样式的定制能力。如通过它调整布局、颜色、边框等，轻松实现美观实用的界面。Lipgloss 能极大地提升 TUI 应用的外观和用户体验。
+Lipgloss，它提供了定义样式和布局的能力。如通过它调整颜色、边框和布局等，轻松实现美观实用的界面。Lipgloss 能极大地提升 TUI 应用的外观和用户体验。
+
+```go
+style := lipgloss.NewStyle().
+  BorderStyle(lipgloss.RoundedBorder()). // 圆角边框
+  Bold(true).                            // 加粗
+  Foreground(lipgloss.Color("#FAFAFA")). // 前景色
+  Background(lipgloss.Color("#7D56F4")). // 背景色
+  PaddingTop(2).                         // 顶部 padding
+  PaddingLeft(4).                        // 左侧 padding
+  AlignVertical(lipgloss.Center).        // 垂直居中
+  Height(5).                             // 高度
+  Width(40)                              // 宽度
+
+// 水平布局
+left := style.Render("Hello Left!")
+right := style.Render("Hello Right")
+fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top, left, right))
+
+// 垂直布局
+top := style.Render("Hello Top!")
+bottom := style.Render("Hello Bottom!")
+fmt.Println(lipgloss.JoinVertical(lipgloss.Top, top, bottom))
+```
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-02-v2.png)
 
 Bubbles，它为 Bubbleta 提供了基础组件。让我能轻松添加各种 UI 组件，如进度条和文本输入框，这些都是创建交互式命令行应用不可或缺的元素。
 
-Huh，为Bubble Tea提供了构建交互式表单和提示的能力。它使我能够轻松地设计和实现各种用户输入界面，从选择列表到文本输入框，再到确认对话框。
+组件的示例代码要结合 bubbletea 框架，我就不粘贴大段的代码了。
 
-Harmonica，支持基于在 bubbletea 引人动画效果。虽然，动画效果不是 TUI 应用的强需求，但也为我们提供了更多可能性。
+文本输入框：
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-03.gif)
 
-如果你有在终端显示 markdown 文档的需求，推荐使用 glamour 库，它支持在终端上显示 Markdown 内容，且支持样式自定义。
+表格：
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-04.gif)
+
+进度条：
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-05.gif)
+
+更多就不一一展示了，查看 bubbles 仓库地址即可。
+
+Huh，为 Bubble Tea 提供了构建交互式表单和提示的能力。相对于 bubbles 中的基础组件，它使我们能轻松实现各种用户输入界面，从选择列表到文本输入框，再到确认对话框。
+
+和 Lipgloss 一样，Huh 也是可脱离 bubbletea 使用的。
+
+一个简单案例：
+
+```go
+var name string
+
+_ = huh.NewInput().
+  Title("What's your name?").
+  Value(&name).
+  Run() // this is blocking...
+
+fmt.Printf("Hey, %s!\n", name)
+```
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-06.gif)
+
+Huh 官方 README 文档中提供了一个完整的购买汉堡的订单流程。
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-07.gif)
+
+## 高级工具库
+
+除了上述的基础库，charmbracelet 下还有一些高级的工具库，如 markdown 渲染器 - glamour 和动画制作 - Harmonica。唯一可惜的是，没找到图表库。
+
+Glamour，它为了终端显示 markdown 文档提供了支持，它支持样式自定义，提供了几种预定义主题风格。
+
+```go
+in := `# Hello World
+
+This is a simple example of Markdown rendering with Glamour!
+Checkout the [other examples](https://github.com/charmbracelet/glamour/tree/master/examples)
+
+Bye!
+`
+r, _ := glamour.NewTermRenderer(glamour.WithAutoStyle(), glamour.WithWordWrap(40))
+out, err := r.Render(in)
+if err != nil {
+  log.Fatal(err)
+}
+
+fmt.Print(out)
+```
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-08.png)
+
+诸如 github、gitlab 和 gitee 的官方 CLI 工具，用的都是这个库实现的 markdown 渲染。
+
+他们还提供了一个基于 Glamour 实现的 glow 命令行工具，支持查看本地或远程的 Markdown 文档。
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-09.gif)
+
+我原本想找一个基于 bubbletea 实现的图表组件库，但只发现了一个名为 Harmonica 的库。
+
+Harmonica 主要是用于模拟弹簧运动，它本身并不提供绘制逻辑，只会生成物理的运动参数（如位置和速度），以实现平滑和自然的动画效果。但它最近已经没更新了。
+
+官方提供的一个案例效果：
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-10.gif)
 
 ## SHELL 脚本编写 TUI
 
-如果你想通过 SHELL 脚本编写 TUI 应用，推荐一个基于 Bubbletea 开发的命令行应用 - **gum**。它提供了一系列的工具，通过 Shell 脚本即可编写TUI应用。如果不熟悉 Go 或者不想深入 Bubbletea 框架，但又想做一些小应用，可以考虑下它。
+我要感慨下，之前看到很多用 rust 写的 CLI 工具，羡慕不已，Go 原来也有这么好用甚至说更佳的库。
+
+如果你对 rust 和 Go 都不了解，但想实现一个 TUI 应用，我要推荐这个命令- Gum，它让我们通过 SHELL 脚本即可实现 TUI 应用。Gum 提供了一系列的工具，通过 Shell 脚本即可编写一些小巧的 TUI 应用，优化我们的日常工作流。
+
+如下是一些简单用法说明：
+
+**选择（choose）**: 创建一个交互式的列表让我们从中选择一个选项。
+  
+```sh
+gum choose "Option 1" "Option 2" "Option 3"
+```
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-11.gif)
+
+**确认（confirm）**: 弹出一个确认对话框让我们选择确认。
+  
+```sh
+gum confirm "Are you sure?"
+```
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-12.gif)
+
+**文件选择（file）**: 让用户从文件系统中选择一个文件。
+  
+```sh
+gum file
+```
+
+**过滤（filter）**: 从输入的列表中过滤出符合条件的项。
+  
+```sh
+echo -e "one\ntwo\nthree" | gum filter
+```
+
+**格式化（format）**: 使用模板格式化字符串。
+  
+```sh
+gum format "Hello, {{.Name}}!" --set Name=World
+```
+
+**输入（input）**: 提示用户输入文本。
+  
+```sh
+gum input --placeholder "Enter your name"
+```
+
+**联接（join）**: 垂直或水平联接文本。
+  
+```sh
+echo -e "Hello\nWorld" | gum join
+```
+
+**分页（pager）**: 分页查看长文本文件。
+  
+```sh
+gum pager long-text-file.txt
+```
+
+**旋转指示器（spin）**: 在执行长时间命令时显示旋转指示器。
+  
+```sh
+gum spin -- sleep 5
+```
+
+**样式（style）**: 应用样式到文本。
+  
+```sh
+echo "Hello, world!" | gum style --foreground 208 --background 235 --bold
+```
+
+**表格（table）**: 渲染一个数据表格。
+  
+```sh
+gum table --header "Name,Email" --rows "Alice,alice@example.com\nBob,bob@example.com"
+```
+
+**写作（write）**: 提示用户输入长文本。
+  
+```sh
+gum write
+```
+
+**日志（log）**: 输出日志信息。
+  
+```sh
+gum log "An error occurred" --level error
+```
+
+`gum`是为了让Shell脚本更加"迷人"，通过这些命令，你可以创建更加丰富和交互式的命令行应用。每个命令都支持多种选项，可以通过运行`gum <command> --help`来查看特定命令的帮助信息和可用选项。
 
 ## SSH 的远程 TUI 应用
 
-随着我对 Bubble Tea 生态系统的进一步探索，我发现了一些特定用途的工具和库，它们为我的TUI应用开发增加了额外的可能性。
+SSH 本质上也是一种传输协议，借助一个名为 wish 的库，我们可轻松实现其他人远程可 SSH 远程访问的 TUI 应用。这与 HTTP 和 Web 服务有这种异曲同工之妙。
 
-**Wish**是一个我特别感兴趣的库。它利用SSH作为传输协议，允许我开发远程TUI应用。这打开了一个全新的领域，让我能够为用户提供安全、无缝的远程访问体验。通过Wish，我能够设计一个可以从任何地方通过SSH访问的TUI应用，这在管理服务器或提供远程服务时尤其有用。
+charmbracelet 下有一个名为 Soft-Serve 的项目，它其实是 TUI 版本的 gitserver。
 
-接着，我遇到了**Soft-Serve**，这是一个TUI版本的Git服务器。它让我惊喜地发现，不仅可以用命令行管理Git仓库，还能拥有一个友好的TUI界面来进行操作。这对于提高我的开发效率有着不小的帮助，也为团队协作提供了一个更直观的方式。
+## 其他
 
-录制终端会话时，**VHS**证明是一个宝贵的资源。无论是为了创建教程还是记录会话，VHS都提供了一种简单而高效的方式来捕捉和分享终端操作。
+除了上述介绍的这些，charmbracelet 下还有其他的一些值得推荐的库。如：
 
-### 应用案例和工具
+vhs，一个终端操作录制命令，提供了一种简单高效的方式捕捉和分享终端操作。
 
-在处理文档和笔记时，**Glow**成为了我的好帮手。它们能够在终端中渲染Markdown，使得查看和编辑文档变得既方便又舒适。我尤其喜欢Glow的阅读体验，它让命令行中的Markdown文件就像是精美的电子书一样。
+pop，一个支持在终端接发邮件的命令，操作起来高效便捷。
 
-探索了这些库和工具之后，我也开始关注一些实际的应用案例，如**Pop**和**Kancli**。Pop让我能够在终端中发送邮件，这对于快速回复或管理我的电子邮件非常方便。而Kancli为我提供了一个在终端管理看板任务的工具，使得我的项目管理更加高效。
+kancli，一个在终端管理看板任务的工具，使得我的项目管理更加高效。
 
-在所有这些探索中，**Log**是我经常回归的工具。它支持彩色日志输出，极大地提高了我的调试效率和日志阅读的舒适度。Log的简单性和实用性让它成为了我开发工具箱中不可或缺的一部分。
+Log，一个支持彩色输出的 Go 日志库，可提高我们日常的调试体验和阅读的舒适度。
 
-### 结语
+## 结语
 
 通过这次深入Bubble Tea及其生态系统的旅程，我不仅学习了如何开发功能丰富的TUI应用，还探索了如何使这些应用更加美观、互动和实用。Bubble Tea生态不仅提供了强大的工具和库，还激发了我对命令行界面新可能性的想象。
 

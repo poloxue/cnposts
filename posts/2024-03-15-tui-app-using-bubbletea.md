@@ -17,7 +17,9 @@ comment: true
 
 ## Bubble Tea 核心框架
 
-Bubbletea 是这个生态的核心框架，它是我们开发 TUI 应用的起点，基于模型-视图-更新（MVU）架构（The Elm Architecture）。具体细节可查看前文的介绍。
+Bubbletea 是这个生态的核心框架，它是我们开发 TUI 应用的起点，基于模型-视图-更新（MVU）架构（The Elm Architecture）。
+
+具体细节可查看前文介绍，其中对 bubbletea 架构的基本架构做了相对详细的说明。
 
 如下是源于官方指南中的 HelloWorld 案例，基于 bubbletea 创建一个简单的计数器。
 
@@ -166,7 +168,7 @@ fmt.Print(out)
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-09.gif)
 
-我原本想找一个基于 bubbletea 实现的图表组件库，但只发现了一个名为 Harmonica 的库。
+我原本想找一个能和 bubbletea 集成的图表组件库，但只发现了一个名为 Harmonica 的库。
 
 Harmonica 主要是用于模拟弹簧运动，它本身并不提供绘制逻辑，只会生成物理的运动参数（如位置和速度），以实现平滑和自然的动画效果。但它最近已经没更新了。
 
@@ -176,13 +178,23 @@ Harmonica 主要是用于模拟弹簧运动，它本身并不提供绘制逻辑�
 
 ## SHELL 脚本编写 TUI
 
-我要感慨下，之前看到很多用 rust 写的 CLI 工具，羡慕不已，Go 原来也有这么好用甚至说更佳的库。
+我要感慨下，之前看到很多用 rust 写的 CLI 工具，羡慕不已，Go 原来也有这么好用或者说是比之更佳的库。
 
-如果你对 rust 和 Go 都不了解，但想实现一个 TUI 应用，我要推荐这个命令- Gum，它让我们通过 SHELL 脚本即可实现 TUI 应用。Gum 提供了一系列的工具，通过 Shell 脚本即可编写一些小巧的 TUI 应用，优化我们的日常工作流。
+如果你对 rust 和 Go 都不了解，但想实现一个 TUI 应用，我要推荐这个命令- Gum，它让我们通过 SHELL 脚本即可实现 TUI 应用。
 
-如下是一些简单用法说明：
+Gum 提供了一系列工具，实现基于 Shell 脚本即可编写一些小巧的 TUI 应用，有助于优化我们的日常工作流。
 
-**选择（choose）**: 创建一个交互式的列表让我们从中选择一个选项。
+我们来看看如下是一些简单用法说明：
+
+- **输入（input）**: 提示用户输入文本。
+  
+```sh
+gum input --placeholder "Enter your name"
+```
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-14.gif)
+
+- **选择（choose）**: 创建一个交互式的列表让我们从中选择一个选项。
   
 ```sh
 gum choose "Option 1" "Option 2" "Option 3"
@@ -190,24 +202,25 @@ gum choose "Option 1" "Option 2" "Option 3"
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-11.gif)
 
+**过滤（filter）**: 从输入的列表中过滤出符合条件的项。
+  
+```sh
+echo -e "one\ntwo\nthree" | gum filter
+```
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-13.gif)
 **确认（confirm）**: 弹出一个确认对话框让我们选择确认。
   
 ```sh
-gum confirm "Are you sure?"
+gum confirm "Are you sure?" && echo "I'm sure" || echo "No"
 ```
 
-![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-12.gif)
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-12-v1.gif)
 
 **文件选择（file）**: 让用户从文件系统中选择一个文件。
   
 ```sh
 gum file
-```
-
-**过滤（filter）**: 从输入的列表中过滤出符合条件的项。
-  
-```sh
-echo -e "one\ntwo\nthree" | gum filter
 ```
 
 **格式化（format）**: 使用模板格式化字符串。
@@ -216,11 +229,6 @@ echo -e "one\ntwo\nthree" | gum filter
 gum format "Hello, {{.Name}}!" --set Name=World
 ```
 
-**输入（input）**: 提示用户输入文本。
-  
-```sh
-gum input --placeholder "Enter your name"
-```
 
 **联接（join）**: 垂直或水平联接文本。
   

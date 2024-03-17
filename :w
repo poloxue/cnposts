@@ -11,15 +11,13 @@ comment: true
 
 一个月前，我写了一篇基于 Bubbletea 开发 TUI 命令的文章。当时的我对这个框架的认识并不深入，仅限于开发一些简单小程序，如果想开发一个如 LazyGit 般复杂的程序时，就没有那么容易了。
 
-今天的文章重点介绍 bubbletea 的一系列扩展库，位于 github.com/charmbracelet 下。
+今天的文章重点介绍 bubbletea 衍生的一系列扩展库，它们都位于 github.com/charmbracelet。
 
-这些扩展库 star 数基本都在千以上。说实在的，很少遇到核心框架之外，扩展库的 star 也基本在千以上的。我觉得主要因为这些库的普适性，基本与 bubbletea 的关系都只是互补关系，而不是强依赖，任意一个库都能拿出来单独介绍。
+特别的是，这些扩展库 star 数基本都在千以上。说实在的，很少遇到核心框架之外，扩展库的 star 也基本在千以上的。我觉得主要因为这些库的普适性，基本与 bubbletea 的关系都只是互补关系，而不是强依赖，基本上任何一个库都能拿出来单独介绍。
 
 ## Bubble Tea 核心框架
 
-Bubbletea 是这个生态的核心框架，它是我们开发 TUI 应用的起点。
-
-Bubbletea 基于模型-视图-更新（MVU）架构（The Elm Architecture）。具体细节可查看前文介绍，其中对 bubbletea 的基本架构做了相对详细的说明。
+Bubbletea 是这个生态的核心框架，它是我们开发 TUI 应用的起点，基于模型-视图-更新（MVU）架构（The Elm Architecture）。具体细节可查看前文介绍，其中对 bubbletea 架构的基本架构做了相对详细的说明。
 
 如下是源于官方指南中的 HelloWorld 案例，基于 bubbletea 创建一个简单的计数器。
 
@@ -282,7 +280,7 @@ ssh git.charm.sh
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-19.gif)
 
-如果你也想拥有这样的一个 git server，可直接部署 charmbracelet/Soft-Serve 这个项目到你的机器上。
+如果你也想拥有这样的一个 git server，可部署 charmbracelet/Soft-Serve 这个项目到你的机器上。
 
 如果你对开发这样的应用有兴趣，官方提供了一些案例。
 

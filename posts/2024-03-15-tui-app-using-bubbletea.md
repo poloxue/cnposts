@@ -1,17 +1,19 @@
 ---
-title: "基于 bubbletea 生态开发 TUI 应用"
+title: "推荐 bubbletea 扩展库开发 TUI 应用"
 date: 2024-03-15T08:50:00+08:00
 draft: true
 comment: true
 ---
 
-我对 TUI 的兴趣源于一个名为 LazyGit 的终端命令，它让我只需几次按键即可完成一次 Git 提交。
+我对 TUI 的兴趣源于一个名为 LazyGit 的终端命令，它让我只需几次按键即可完成一次 Git 提交，而不是 zsh 的 git 插件那种通过 alias 的方式实现。
 
-不同于 GUI，TUI 低系统资源消耗和高效的全键盘操作促使我学习如何开发这类应用。最终，我找到了 Bubbletea 这个框架。
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-25.gif)
 
-一个月前，我写了一篇基于 Bubbletea 开发 TUI 命令的文章。当时的我对这个框架的认识并不深入，仅限于开发一些简单小程序，如果想开发一个如 LazyGit 般复杂的程序时，就没有那么容易了。
+不同于 GUI，TUI 低系统资源消耗和高效的全键盘操作，这让我对如何开发这类应用产生了兴趣。
 
-今天的文章重点介绍 bubbletea 的一系列扩展库，位于 github.com/charmbracelet 下。
+最终，我找到了 Bubbletea 这个框架。一个月前，还写了一篇基于 Bubbletea 开发 TUI 命令的文章。当时的我对这个框架的认识并不深入，仅限于开发一些简单小程序，如果想开发一个如 LazyGit 般复杂的程序时，就没有那么容易了。
+
+今天的文章重点介绍 bubbletea 的一系列扩展库，和  bubbletea 一样是位于 github.com/charmbracelet 下，由 charmbracelet 团队开发的其他开源库。
 
 这些扩展库 star 数基本都在千以上。说实在的，很少遇到核心框架之外，扩展库的 star 也基本在千以上的。我觉得主要因为这些库的普适性，基本与 bubbletea 的关系都只是互补关系，而不是强依赖，任意一个库都能拿出来单独介绍。
 
@@ -282,27 +284,52 @@ ssh git.charm.sh
 
 ![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-19.gif)
 
-如果你也想拥有这样的一个 git server，可直接部署 charmbracelet/Soft-Serve 这个项目到你的机器上。
+如果你也想拥有这样的一个 git server，可直接部署 charmbracelet/Soft-Serve 这个项目到你的机器上。或者如果你对开发这样的应用有兴趣，官方提供了一些案例，查看地址 [examples](https://github.com/charmbracelet/wish/tree/main/examples)，其中就有一个 gitserver 的案例。
 
-如果你对开发这样的应用有兴趣，官方提供了一些案例。
+还有，charmbracelet 团队还开发一个名为 wishlist 的应用，可作为 ssh 应用的展示目录。
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-20.gif)
+
+它不限制是否是 wish 开发的应用。如上所示，我可以将我的 SSH 机器的绑定其中。
 
 ## 其他
 
 除了上述介绍的这些，charmbracelet 下还有其他的一些值得推荐的库。如：
 
-vhs，一个终端操作录制命令，提供了一种简单高效的方式捕捉和分享终端操作。
+[vhs](https://github.com/charmbracelet/vhs)，一个终端操作录制命令，提供了一种简单高效的方式捕捉和分享终端操作。我这篇文章的 GIF 基本都是通过它录制的。
 
-pop，一个支持在终端接发邮件的命令，操作起来高效便捷。
+它的使用很简单，创建一个 record.tape 文件，内容如下：
 
-kancli，一个在终端管理看板任务的工具，使得我的项目管理更加高效。
+```bash
+Set TypingSpeed 500ms
+Type 'echo "Hello VHS"'
+Enter
+Sleep 2s
+```
 
-Log，一个支持彩色输出的 Go 日志库，可提高我们日常的调试体验和阅读的舒适度。
+执行如下命令即可生成一个 gif 文件。
+
+```bash
+$ vhs record.tape
+```
+
+生成效果：
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-21.gif)
+
+[mods](https://github.com/charmbracelet/mods)，一个 LLM GPT 的终端命令，可对接市面主流的大模型 AI，如 openai、grok、localai 等。我用了下体验还不错。
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-22.gif)
+
+[pop](https://github.com/charmbracelet/pop)，一个支持在终端接发邮件的命令，操作起来高效便捷。
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-23.gif)
+
+[Log](https://github.com/charmbracelet/log)，一个支持彩色输出的 Go 日志库，可提高我们日常的调试体验和阅读的舒适度。
+
+![](https://cdn.jsdelivr.net/gh/poloxue/images@2024-03/2024-03-15-tui-app-using-bubbletea-24.gif)
 
 ## 结语
 
-通过这次深入Bubble Tea及其生态系统的旅程，我不仅学习了如何开发功能丰富的TUI应用，还探索了如何使这些应用更加美观、互动和实用。Bubble Tea生态不仅提供了强大的工具和库，还激发了我对命令行界面新可能性的想象。
-
-正如我在这篇文章的开始提到的，无论是开发简单的行内工具、复杂的全屏应用，还是利用Go编程或Shell脚本，甚至是创建表单、处理Markdown或开发远程TUI应用，Bubble Tea及其扩展库都能提供必要的支持和灵感。
-
-我希望我的经历能够激励更多的开发者探索这个生态系统，并发现它为TUI应用开发带来的乐趣和便利。Bubble Tea不仅是一个框架，它是一个充满可能性的世界，等待着每一个好奇和热情的探索者。
+这次深入 BubbleTea 及其生态中的其他组件，不仅学习了如何开发功能丰富的TUI应用，还知道如何使这些应用更加美观与实用。Bubble Tea 生态不仅提供了强大的工具和库，还激发了我对命令行应用新可能性的想象，有趣的经历。
 
